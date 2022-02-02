@@ -53,23 +53,23 @@ class SKU implements InterfaceCheckout{
     public function scanItems( string $item){
 
         //return error if the item doesn't exist in the pre-defined array
-        if(!array_key_exists($item,$products)){
+        if(!array_key_exists($item,$this->products)){
             return "Item not found. Please contact the sales person.";
         }
         //if found, add the item and set the no. of item and its unit price 
         $this->products[$item] = $this->products[$item] + 1;
         
         $this->bill[] = [
-            'product' => $products,
+            'product' => $this->products,
             'price' => $this->products_unit_price[$item]
         ];
     }
 
     // function for getting the total bill for the items
     public function billItems(): float {
-
+        $total = 0;
         //set the total price based on the unit price
-        $totalPrice = array_reduce($this->bill,billTotalForUnitPrice($total,$products));
+        $totalPrice = array_reduce($this->bill,'billTotalForUnitPrice');
         $totalDiscount = 0;
         //calculate the discounted price
         foreach($this->discounted_price as $item => $discount){
@@ -81,21 +81,21 @@ class SKU implements InterfaceCheckout{
                 }
             }else{
                 //if discount is associated with the quantity
-                if($this->products[$tem] >=  $discount['quantity']){
-                    $totQtty = floor($this->products[$tem]/$discount['quantity']);
+                if($this->products[$item] >=  $discount['quantity']){
+                    $totQtty = floor($this->products[$item]/$discount['quantity']);
                     $totalDiscount = $totQtty * $discount['price'];
                 }
             }
            
         }
         //calculate and return the actual amount
-        return StotalPrice -  $totalDiscount;
+        return $totalPrice -  $totalDiscount;
     }
     // function to calculate the total price in the array_reduce of billItems(): float
-    public function billTotalForUnitPrice($tot, array $items){
+    public function billTotalForUnitPrice(){
 
         $tot = 0;
-        $tot += $items['price'];
+        $tot += $this->products['price'];
         return $tot;
     }
 
